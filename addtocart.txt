@@ -1,0 +1,260 @@
+@model Tuple<IEnumerable<SelectListItem>, IEnumerable<SelectListItem>, IEnumerable<SelectListItem>>
+@{
+    ViewBag.Title = "Index";
+}
+
+<script src="~/Scripts/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $("#Item").val(0);
+         
+            $("#item").change(function () {
+                var itemid = $("#Item").val();
+ GetItemUnitPrice(itemid)
+});
+
+            $("#input[type=text]").change(function () {
+                calculateSubTotal();
+
+            });
+            $("#btnaddtolist").click(function () {
+                Addtotheitemlist();
+            });
+        });
+        function ResetItem(itemid) {
+            $(itemid).closest('tr').remove();
+        }
+
+
+
+        function Addtotheitemlist() {
+            var tblitemlist = $("#tblproductlistitem");
+            var unitprice = $("txtunitprice").val();
+            var quantity = $("txtquantity").val();
+            var discount = $("txtdiscount").val();
+            var Itemid = $("#Item").val();
+            var ItemName = $("#Item option:selected").text();
+            var Total = (unitprice * quantity) - discount;
+            var Itemlist = "<tr><td hidden>" +
+                Itemid +
+                "<tr><td hidden>" +
+                ItemName +
+                "<tr><td hidden>" +
+                parseFloat(unitprice).toFixed(2) +
+                "</td><td>" +
+                parseFloat(quantity).toFixed(2)
+                + "</td><td>" +
+                parseFloat(discount).toFixed(2) +
+                "</td><td>" +
+                parseFloat(Total).toFixed(2) +
+                "</td><td> <input type='button' value='Remove' name='remove' class='btn btn-danger' onclick='RemoveItem(this)' /> </tr></tr>";
+            tblitemlist.append(Itemlist);
+            finalitemtotal();
+            ResetItem();
+
+            function.txtfinaltotal() {
+                $("#txtfinaltotal").val("0.00");
+                var finaltotal = 0.00;
+                $("#tblproductlistitem").find("tr:gt(0)").each(function () {
+                    var total = parseFloat($(this).find("td:eq(5)").text());
+                    finaltotal += total;
+                    alert(finaltotal);
+                });
+                $("#txtfinaltotal").val(parseFloat(finaltotal).toFixed(2));
+            }
+
+        }
+        function ResetItem() {
+            $("txtunitprice").val('');
+            $("txtquantity").val('');
+            $("txtdiscount").val('0.00');
+            $("#Item").val(0);
+            $("#txttotal").val("");
+        }
+
+        function calculateSubTotal() {
+            var unitprice = $("txtunitprice").val();
+            var quantity = $("txtquantity").val();
+            var discount = $("txtdiscount").val();
+
+            var Total = (unitprice * quantity) - discount;
+            $("#txttotal").val(parseFloat(Total).toFixed(2));
+        }
+
+
+
+
+
+
+
+
+function GetItemUnitPrice(itemid){
+           $.ajax({
+            async:true,
+             type: 'GET',
+              datatype: 'JSON',
+               contenttype: 'application/json; charset=uf-8',
+               url:'/product/getItemunitprice',
+               success: function (data) {
+                   $("#txtunitprice").val(parseFloat(data).toFixed(2));
+},
+             error:function() {
+alert("there is some problem to get the unit price.");
+                        }
+                     });
+                        }
+
+    </script>
+
+
+<style>
+   
+    fieldset{
+       border: 1px solid #ddd !important;
+       margin: 0;
+       xmin-width: 10px;
+       padding: relative;
+       border-radius: 4px;
+       background-color: #f5f5f5;
+       padding-left: 10px !important;
+}
+
+lengend {
+ font-size: 14pz;
+font-weight: bold;
+margin-bottom: 0px;
+border: 1px solid #ddd;
+border-radius: 4px;
+padding: 5px 5px 5px 10px;
+background-color: 10px !important;
+}
+</style>
+
+
+
+<fieldset>
+    <legend>
+        Products
+    </legend>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    Coustmer :
+                    @Html.DropDownList(name: "coustmer", selectList: new SelectList(Model.Item1, dataValueField: "value", dataTextField: "text"),
+                              htmlAttributes: new { @class = "form-control" })
+
+                </div>
+
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    PymentType :
+                    @Html.DropDownList(name: "PaymentType", selectList: new SelectList(Model.Item3, dataValueField: "value", dataTextField: "text"),
+                              htmlAttributes: new { @class = "form-control" })
+
+                </div>
+
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                  Total:
+                 <input style="text-align: right" type="text"  value="0.00" name="final total" readonly="readonly" id="txtfinaltotal" class="form-control" />
+
+                </div>
+
+            </div>
+
+
+        </div>
+
+
+    </div>
+
+
+</fieldset>
+<fieldset>
+    <legend>
+        Product Items
+    </legend>
+    <div class="container">
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    Item:
+@Html.DropDownList(name: "PaymentType", selectList: new SelectList(Model.Item2, dataValueField: "value", dataTextField: "text"),
+         htmlAttributes: new { @class = "form-control" })
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    Unit Price:
+                    <input style="text-align: right" type="text" readonly="readonly" id="txtunitprice" value="0.00" name="unitprice" class="form-control" />
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                Quantity:
+                <input style="text-align: right" type="text" id="txtquantity" value="0.00" name="Quantity" class="form-control" />
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="form-group">
+                Discount:
+                <input style="text-align: right" type="text"  id="txtdiscount" value="0.00" name="discount" class="form-control" />
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+            total:
+            <input style="text-align: right" type="text" readonly="readonly" id="txttotal" value="0.00" name="total" class="form-control" />
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group">
+
+            <input type="button"  style="margin-top:20px" value="add to list" name="add to list" id="btnaddtolist" class="btn btn-success" />
+        </div>
+    </div>
+
+
+</fieldset>
+    <fieldset>
+        <legend>
+            Product listem items
+        </legend>
+        <table style="width:100%" id="tblproductlistitem">
+            <thead>
+                <tr>
+                    <th hidden>
+                        item id
+                    </th>
+                    <th hidden>
+                        item name
+                    </th>
+                    <th hidden>
+                        unit price
+                    </th>
+                    <th hidden>
+                        quantity
+                    </th>
+                    <th hidden>
+                        discount
+                    </th>
+                    <th hidden>
+                        action
+                    </th>
+
+
+                </tr>
+            </thead>
+
+        </table>
+    </fieldset>
+<div style="margin-top: 50px">
+    <input style="float:right" type="button" value="save" name="save" id="btnsaveorder" class="btn btn-primary" />
+</div>
+
